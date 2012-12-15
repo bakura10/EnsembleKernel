@@ -32,36 +32,50 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @package     Ensemble\Kernel
+ * @package     Ensemble\KernelDoctrineORM
  * @author      Jurian Sluiman <jurian@soflomo.com>
  * @copyright   2012 Soflomo http://soflomo.com.
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://ensemble.github.com
  */
 
-return array(
-    'ensemble_kernel' => array(
-        /**
-         * Class for page service
-         */
-        'page_service_class' => 'Ensemble\Kernel\Service\Page',
+namespace Ensemble\Kernel\Mapper;
 
-        /**
-         * Whether page parsing (routes + navigation) is enabled
-         */
-        'pages_parse'      => true,
+use Doctrine\Common\Persistence\ObjectRepository;
+use Ensemble\Kernel\Model\PageInterface as PageModel;
 
-        /**
-         * Whether page instances should be loaded during dispatch
-         */
-        'page_load'        => true,
+interface PageInterface extends ObjectRepository
+{
+    /**
+     * Persist a new page in the persistency layer
+     *
+     * @param  PageModel $page Page to persist
+     * @return PageModel       The persisted page
+     */
+    public function persist(PageModel $page);
 
-        /**
-         * Flags to enable/disable cache and keys pointing to cache adapters
-         */
-        'cache_routes'     => false,
-        'cache_navigation' => false,
-        'cache_routes_key'    => '',
-        'cache_navigation_key' => ''
-    ),
-);
+    /**
+     * Update an existing page
+     *
+     * @param  PageModel $page Page to update
+     * @return PageModel       The updated page
+     */
+    public function update(PageModel $page);
+
+    /**
+     * Delete a page
+     *
+     * @param  PageModel $page Page to delete
+     * @return bool            True if page is deleted
+     */
+    public function delete(PageModel $page);
+
+    /**
+     * Get all root nodes
+     *
+     * @param string|null   $sortByField
+     * @param string        $direction
+     * @return mixed
+     */
+    public function getRootNodes($sortByField = null, $direction = 'ASC');
+}

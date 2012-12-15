@@ -32,36 +32,94 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * @package     Ensemble\Kernel
+ * @package     Ensemble\KernelDoctrineORM
  * @author      Jurian Sluiman <jurian@soflomo.com>
  * @copyright   2012 Soflomo http://soflomo.com.
  * @license     http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @link        http://ensemble.github.com
  */
 
-return array(
-    'ensemble_kernel' => array(
-        /**
-         * Class for page service
-         */
-        'page_service_class' => 'Ensemble\Kernel\Service\Page',
+namespace Ensemble\Kernel\Service;
 
-        /**
-         * Whether page parsing (routes + navigation) is enabled
-         */
-        'pages_parse'      => true,
+use Ensemble\Kernel\Mapper\PageInterface as PageMapperInterface;
+use Ensemble\Kernel\Model\PageCollection as PageCollectionModel;
+use Ensemble\Kernel\Model\PageInterface  as PageModel;
 
-        /**
-         * Whether page instances should be loaded during dispatch
-         */
-        'page_load'        => true,
+/**
+ * Description of Page
+ */
+class Page
+{
+    /**
+     * @var PageMapperInterface
+     */
+    protected $pageMapper;
 
-        /**
-         * Flags to enable/disable cache and keys pointing to cache adapters
-         */
-        'cache_routes'     => false,
-        'cache_navigation' => false,
-        'cache_routes_key'    => '',
-        'cache_navigation_key' => ''
-    ),
-);
+
+    /**
+     * Constructor
+     *
+     * @param PageMapperInterface $pageMapper
+     */
+    public function __construct(PageMapperInterface $pageMapper)
+    {
+        $this->pageMapper = $pageMapper;
+    }
+
+    /**
+     * Create a new page
+     *
+     * @param  PageModel $page
+     * @return PageModel
+     */
+    public function persist(PageModel $page)
+    {
+        return $this->pageMapper->persist($page);
+    }
+
+    /**
+     * Update an existing page
+     *
+     * @param  PageModel $page
+     * @return PageModel
+     */
+    public function update(PageModel $page)
+    {
+        return $this->pageMapper->update($page);
+    }
+
+    /**
+     * Delete an existing page
+     *
+     * @param  PageModel $page
+     * @return bool
+     */
+    public function delete(PageModel $page)
+    {
+        return $this->pageMapper->delete($page);
+    }
+
+    /**
+     * Find page based on id
+     *
+     * @param  int $id
+     * @return Page
+     */
+    public function find($id)
+    {
+        return $this->pageMapper->find($id);
+    }
+
+    /**
+     * Get the tree of pages
+     *
+     * @return PageCollectionModel
+     */
+    public function getTree()
+    {
+        $pages      = $this->pageMapper->getRootNodes('order', 'ASC');
+        $collection = new PageCollectionModel($pages);
+
+        return $collection;
+    }
+}

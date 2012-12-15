@@ -39,34 +39,41 @@
  * @link        http://ensemble.github.com
  */
 
+use Ensemble\Kernel\Exception;
 use Ensemble\Kernel\Listener;
 use Ensemble\Kernel\Parser;
 use Ensemble\Kernel\Service;
 
-use Ensemble\Kernel\Exception;
-
 return array(
     'factories' => array(
         'Ensemble\Kernel\Service\Page' => function ($sm) {
-            $config   = $sm->get('config');
+            $config   = $sm->get('Config');
             $config   = $config['ensemble_kernel'];
             if (empty($config['page_service_class'])) {
                 throw new Exception\PageServiceNotFoundException(
-                    'No service manager key provided for an service adapter'
+                    'No service manager key provided for a service adapter'
                 );
             }
 
-            $service  = $sm->get($config['page_service_class']);
+            $pageMapper   = $sm->get('Ensemble\Kernel\Mapper\Page');
+            $serviceClass = $config['page_service_class'];
+            $service      = new $serviceClass($pageMapper);
 
-            if (!$service instanceof Service\PageInterface) {
+            if (!$service instanceof Service\Page) {
                 throw new Exception\PageServiceNotFoundException(
-                    'Instance of service adapter does not implement Ensemble\Kernel\Service\PageInterface'
+                    'Service is not an instance or subclass of Ensemble\Kernel\Service\Page'
                 );
             }
             return $service;
         },
+        'Ensemble\Kernel\Mapper\Page' => function () {
+            throw new Exception\PageMapperNotFoundException(
+                'No mapper implementing Ensemble\Kernel\Mapper\PageInterface was found. Please use
+                 Ensemble\KernelDoctrineOrm or implement your own mapper under this key'
+            );
+        },
         'Ensemble\Kernel\Listener\DefaultListenerAggregate' => function ($sm) {
-            $config = $sm->get('configuration');
+            $config = $sm->get('Config');
             $config = $config['ensemble_kernel'];
 
             $listener  = new Listener\DefaultListenerAggregate;
@@ -148,7 +155,7 @@ return array(
             return $listener;
         },
         'Ensemble\Kernel\Parser\Route' => function ($sm) {
-            $config = $sm->get('config');
+            $config = $sm->get('Config');
             $routes = $config['cmf_routes'];
 
             $parser = new Parser\Route;
